@@ -1,0 +1,197 @@
+%ME433 Rocket Science - Angel Jimenez Vasconez
+%Homework 4
+clear; clc; close;
+
+%1)Pipe Configuration: Heat Addition Followed by Pipe Section with Friction
+
+%Inlet Parameters
+M1 = 0.5; %Mach Number at Inlet 0.5
+P1 = 101325; %Pa Pressure at Inlet
+T1 = 300; %K Temperature at Inlet
+gamma = 1.4; %Specific Heat Ratio of Working Fluid
+d = 0.1; %m  Pipe Diameter
+cp = 1.005; %kJ/(kg*k) Specific Heat of Air at Constant Pressure
+R = 287; % J/kg*K Gas Constant
+f = 0.004; %Frictional Coefficient
+
+%Simple Calculations
+rho1 = P1/(R*T1); %kg/m^3 Density of Fluid At Inlet
+
+%Rayleigh Flow (Heat Addition)
+Q = linspace(0,142,500); %kJ/kg Amount of Heat Added Being Considered
+
+%Stagnation Properties
+T01 = T1*(1 + 0.5*(gamma-1)*M1^2); %Calculation Stagnation Temperature at 1
+T02 = (Q/cp) + T01; %Calculation Stagnation Temperature at 2 with Arbitrary Q
+P01 = P1*(1+ 0.5*(gamma-1)*M1^2)^(gamma/(gamma-1)); %Calculation Stagnation Pressure at 1
+
+[T_Tstar_stag] = Ray_ref_temperature_stag(M1, gamma);
+T0_star = T01/T_Tstar_stag; %T0_Star Calculated from Stagnation
+
+%Solving for State 2 Properties after Heat(Q) is Added
+M2 = zeros(size(T02)); %Intializing M2 as an Array
+[T1_Tstar] = Ray_ref_temperature(M1, gamma); %Finding Value for T1/Tstar
+[P1_Pstar] = Ray_ref_pressure(M1, gamma); %Finding Value for P1/Pstar
+[rho1_rhostar] = Ray_ref_density(M1, gamma); %Finding Value for rho1/rhostar
+
+for i = 1:length(T02)
+    %Solving for a range of M2 Values Based on Heat Addition
+    options = optimset('Display','off');
+    M2_func = @(M2) (((gamma + 1)*M2^2)/(1+gamma*M2^2)^2)*(2+(gamma-1)*M2^2) - (T02(i)/T0_star);
+    M2(i) = fsolve(M2_func, 0.5, options); %Solving for range of M2 using optimization toolbox
+
+    %Solving for T2, P2, rho2 using M2
+    [T2_Tstar] = Ray_ref_temperature(M2(i), gamma); %Calling Function to Determine T2/Tstar
+    T2(i) = (T2_Tstar/T1_Tstar)*T1; %Calculating for T2 using T/Tstar ratios and T1
+
+    [P2_Pstar] = Ray_ref_pressure(M2(i), gamma); %Calling Function to Determine P2/Pstar
+    P2(i) = (P2_Pstar/P1_Pstar)*P1; %Calculating for P2 using P/Pstar ratios and P1
+
+    [rho2_rhostar] = Ray_ref_density(M2(i), gamma); %Calling Function to Determine rho2/rhostar
+    rho2(i) = (rho2_rhostar/rho1_rhostar)*rho1; %Calculating for P2 using P/Pstar ratios and P1
+end
+
+%Fanno Flow (Friction Considered in Pipe and Adiabatic)
+M3 = 1; %Mach Number at Pipe Outlet
+[fl3_max_D] = Fanno_max_length(M3,gamma); %Calculating the Fanno Parameter M3 (f*L_max/D)
+
+%Finding the Pipe Length Required to Get M3=1
+for i=1:length(M2)
+    %Calculating for Maximum Fanno Distance M2 (f*L_max/D)
+    [fl2_max_D(i)] = Fanno_max_length(M2(i),gamma); %Calculating the Fanno Parameter M2 (4f*L_max/D)
+    Pipe_Length(i) = ((fl2_max_D(i) - fl3_max_D)*d)/(4*f); %Calculating the Pipe Length Needed Based on Heat Addition (L_max = (D*constant/4f))
+
+    %Calculating T3 and P3
+    [T2_Tstar_fanno] = Fanno_ref_temperature(M2(i), gamma); %Calling Function to Determine T2/Tstar for Fanno
+    [T3_Tstar_fanno] = Fanno_ref_temperature(M3, gamma); %Calling Function to Determine T3/Tstar for Fanno
+    T3 = (T3_Tstar_fanno/T2_Tstar_fanno)*T2(i); %Calculating for T3 After Pipe with Friction
+
+    [P2_Pstar_fanno] = Fanno_ref_pressure(M2(i), gamma); %Calling Function to Determine P2/Pstar for Fanno
+    [P3_Pstar_fanno] = Fanno_ref_pressure(M3, gamma); %Calling Function to Determine P3/Pstar for Fanno
+    P3 = (P3_Pstar_fanno/P2_Pstar_fanno)*P2(i); %Calculating for P3 After Pipe with Friction
+end
+
+figure(1)
+plot(Q, Pipe_Length);
+xlabel('Q: Heat Addition (kJ/kg)');
+ylabel('L:Pipe Length (m)');
+title('Q1: Pipe Length as A Function of Q(Heat Addition)');
+
+%%
+clear; clc;
+
+%2)Pipe Configuration: Pipe Section with Friction Followed by Heat Addition
+
+%Inlet Parameters
+M1 = 0.5; %Mach Number at Inlet 0.5
+P1 = 101325; %Pa Pressure at Inlet
+T1 = 300; %K Temperature at Inlet
+gamma = 1.4; %Specific Heat Ratio of Working Fluid
+d = 0.1; %m  Pipe Diameter
+cp = 1.005; %kJ/(kg*k) Specific Heat of Air at Constant Pressure
+R = 287; % J/kg*K Gas Constant
+f = 0.004; %Frictional Coefficient
+
+%Fanno Flow (Friction Considered in Pipe and Adiabatic)
+L = linspace(0,6.72,500); %m Length of Pipe Being Considered
+
+[fl1_max_D] = Fanno_max_length(M1,gamma); %Calculating the Fanno Parameter M1 (f*L_max/D)
+%Finding the Pipe Length Required to Get M2=1
+for i = 1:length(L)
+    fl2_max_D(i) = fl1_max_D - (4*f*L(i))/d; %Calculating for (f*L2_max/D)
+
+    %Solving for a range of M2 Values Based on Length
+    options = optimset('Display','off');
+    M2_func = @(M2) ((1-M2^2)/(gamma*M2^2))+((gamma+1)/(2*gamma))*log((M2^2)/((2/(gamma+1))*(1+0.5*(gamma-1)*M2^2))) - fl2_max_D(i);
+    M2(i) = fsolve(M2_func, 0.5, options); %Solving for range of M2 using optimization toolbox
+
+    %Calculating T2 and P2
+    [T1_Tstar_fanno] = Fanno_ref_temperature(M1, gamma); %Calling Function to Determine T1/Tstar for Fanno
+    [T2_Tstar_fanno] = Fanno_ref_temperature(M2(i), gamma); %Calling Function to Determine T2/Tstar for Fanno
+    T2(i) = (T2_Tstar_fanno/T1_Tstar_fanno)*T1; %Calculating for T2 After Pipe with Friction
+
+    [P1_Pstar_fanno] = Fanno_ref_pressure(M1, gamma); %Calling Function to Determine P1/Pstar for Fanno
+    [P2_Pstar_fanno] = Fanno_ref_pressure(M2(i), gamma); %Calling Function to Determine P2/Pstar for Fanno
+    P2(i) = (P2_Pstar_fanno/P1_Pstar_fanno)*P1; %Calculating for P2 After Pipe with Friction
+
+end
+
+%Rayleigh Flow (Heat Addition)
+M3 = 1; %Mach Number at Pipe Outlet
+
+%Finding the Heat Addition Required to Get M3=1
+for i=1:length(M2)
+    %Solving for State 2 Properties after Heat(Q) is Added
+    [T2_Tstar(i)] = Ray_ref_temperature(M2(i), gamma); %Finding Value for T1/Tstar
+    [P2_Pstar(i)] = Ray_ref_pressure(M2(i), gamma); %Finding Value for P1/Pstar
+
+    %Solving for T2 and P2 using M2
+    [T3_Tstar] = Ray_ref_temperature(M3, gamma); %Calling Function to Determine T2/Tstar
+    T3 = (T3_Tstar/T2_Tstar(i))*T1; %Calculating for T2 using T/Tstar ratios and T1
+    [P3_Pstar] = Ray_ref_pressure(M3, gamma); %Calling Function to Determine P2/Pstar
+    P3 = (P3_Pstar/P2_Pstar(i))*P1; %Calculating for P2 using P/Pstar ratios and P1
+
+    %Calculating Heat Addition
+    T02 = T2(i)*(1 + 0.5*(gamma-1)*M3^2); %Calculation Stagnation Temperature at 3
+    T03_T0star = 1; %since M3 = 1
+    [T02_T0star(i)] = Ray_ref_temperature_stag(M2(i), gamma); %Calculating T02_T0star = 
+    Q(i) = cp*(T03 - T02(i)); %kJ/kg Calculating for Heat Addition
+end
+
+figure(2)
+plot(Q, L);
+xlabel('Q: Heat Addition (kJ/kg)');
+ylabel('L:Pipe Length (m)');
+title('Q2: Pipe Length as A Function of Q(Heat Addition)');
+
+%%
+clear; clc;
+%3)Airfoil Designs 
+M_Inlet = 3; %Inlet Mach Number
+gamma = 1.4; %Specific Heat Ratio of Working Fluid
+
+
+
+%State 1 and 2 Temperature, Pressure, and Density Functions Rayleigh Flow
+%(Heat Addition)
+function [P_Pstar] = Ray_ref_pressure(mach, gamma)
+    P_Pstar = (1 + gamma)/(1 + gamma*mach^2); 
+end
+
+function [T_Tstar] = Ray_ref_temperature(mach, gamma)
+    T_Tstar = mach^2 *((1+gamma)/(1+gamma*mach^2))^2;
+end
+
+function [rho_rhostar] = Ray_ref_density(mach, gamma)
+    rho_rhostar = (1 + gamma*mach^2)/((1+gamma)*mach^2);
+end
+
+function [P_Pstar_stag] = Ray_ref_pressure_stag(mach, gamma)
+    P_Pstar_stag = ((1 + gamma)/(1+gamma*mach^2))*((2+(gamma-1)*mach^2)/(gamma+1))^2;
+end
+
+function [T_Tstar_stag] = Ray_ref_temperature_stag(mach, gamma)
+    T_Tstar_stag = (((gamma + 1)*mach^2)/(1+gamma*mach^2)^2)*(2+(gamma-1)*mach^2);
+end
+
+%State 1 and 2 Temperature, Pressure, and Density Functions Fanno Flow
+%(Friction in Pipe)
+function [P_Pstar] = Fanno_ref_pressure(mach, gamma)
+    P_Pstar = (1/mach)*((gamma+1)/(2+(gamma-1)*mach^2))^(1/2);
+end
+
+function [T_Tstar] = Fanno_ref_temperature(mach, gamma)
+    T_Tstar = ((gamma+1)/(2+(gamma-1)*mach^2));
+end
+
+function [rho_rhostar] = Fanno_ref_density(mach, gamma)
+    rho_rhostar = (1/mach)*((2+(gamma-1)*mach^2)/(gamma+1))^1/2;
+end
+
+function [P_Pstar_stag] = Fanno_ref_pressure_stag(mach, gamma)
+    P_Pstar_stag = (1/mach)*((2+(gamma-1)*mach^2)/(gamma+1))^((gamma+1)/(2*(gamma-1)));
+end
+
+function [fl_max_D] = Fanno_max_length(mach,gamma)
+    fl_max_D = ((1-mach^2)/(gamma*mach^2))+((gamma+1)/(2*gamma))*log((mach^2)/((2/(gamma+1))*(1+0.5*(gamma-1)*mach^2))); %Calculating Maximum Fanno Parameter (4f*L_max/D)
+end
