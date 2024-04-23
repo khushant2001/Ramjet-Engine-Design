@@ -9,7 +9,7 @@ function [] = converging_section(M_in, T_in, P_in,A_in)
     P_0 = P_in*(1 + .5*(gaama-1)*M_in^2)^(gaama/(gaama-1));
 
     % Variables the need to be deleted later!!
-    A1 = 1; % A1 = A_in
+    A1 = A_in;
     i = 0; % Need to figure out how to get the x points. So this can be deleted. 
 
     % Defining arrays to store future state properties. 
@@ -17,7 +17,7 @@ function [] = converging_section(M_in, T_in, P_in,A_in)
     T2 = [];
     P2 = [];
     M_out = [];
-    while M2 <= 1
+    while M2 <= 1.0
         M_out = [M_out,M2];
         i = i+1;
         M2 = M2 + .005;
