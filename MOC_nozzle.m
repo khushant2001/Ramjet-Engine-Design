@@ -1,5 +1,7 @@
-function [c_plus,wall] = MOC_nozzle(n,gaama,mach_exit, P_star, T_star)
-
+function [x_wall,y_wall,P_out,T_out] = MOC_nozzle(n,mach_exit, P_star, T_star)
+    
+    disp("Calculating Properties Across Exit Nozzle ...")
+    gaama = 1.4;
     % Caluclating theta_max for the nozzle!
     theta_max = calc_neu(gaama, mach_exit)*.5;
 
@@ -150,6 +152,12 @@ function [c_plus,wall] = MOC_nozzle(n,gaama,mach_exit, P_star, T_star)
             end
         end
     end
+    [x_wall,y_wall] = find_points(c_plus,wall);
+    last_wave = c_plus{end};
+    last_wave_properties = values(last_wave);
+    end_property = last_wave_properties(end);
+    P_out = end_property{1}(10);
+    T_out = end_property{1}(9);
 end
 
 function [c_plus, c_minus,wall,centerline] = characteristic_lines(n,gaama,theta_max)
@@ -205,5 +213,16 @@ function M = calc_mach(gaama,neu)
         else
             M = M + 0.001;
         end
+    end
+end
+
+function [x_wall,y_wall] = find_points(c_plus,wall)
+    x_wall = [];
+    y_wall = [];
+    for i = 1:length(wall)
+        wave = c_plus{i};
+        properties = wave(wall(i));
+        x_wall(i) = properties{1}(1);
+        y_wall(i) = properties{1}(2);
     end
 end

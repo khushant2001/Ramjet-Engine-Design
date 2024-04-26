@@ -9,12 +9,12 @@
 
 function [T_2, P_2, M_2,x_cowl,y_cowl,x,y,area] = inlet_design(mach_in, P_in, T_in,L1,L2)
     
-    disp("Inlet design...");
+    disp("Calculating Properties Across Inlet...");
     gaama = 1.4;
     % Finding the optimized angles:
     [theta1,theta2] = find_angles(mach_in,P_in);
-    disp(['Theta1 = ',num2str(theta1)]);
-    disp(['Theta2 = ',num2str(theta2)]);
+    disp(['...Theta1 = ',num2str(theta1)]);
+    disp(['...Theta2 = ',num2str(theta2)]);
     % First step
     [M_12, t_ratio1, p_ratio1,beta1] = shock_relations(mach_in,gaama,theta1,0,1,0);
     
@@ -40,15 +40,15 @@ function [T_2, P_2, M_2,x_cowl,y_cowl,x,y,area] = inlet_design(mach_in, P_in, T_
     
     % TODO: NEEDS TO BE CHECKED
     area = y_cowl(2) - y(3);%sind(theta_temp)*temp_length;
-    disp(["Intake area = ",num2str(area)]);
+    disp(['...Intake area = ',num2str(area)]);
 end
 
 % To find the set of 2 angles that maximize the stagnation pressures. 
 function [theta1,theta2] = find_angles(mach_in, P_in)
     gaama = 1.4;
     [~,P_01] = stagnation_values(0,P_in,mach_in);
-    theta_1 = linspace(5,20,100);
-    theta_2 = linspace(10,20,100);
+    theta_1 = linspace(15,20,100);
+    theta_2 = linspace(20,20,100);
     ratios = zeros(length(theta_1),length(theta_2));
 
     % Running a 2d loop!
@@ -70,7 +70,7 @@ end
 
 % Design the cowl. 
 function [x_cowl,y_cowl] = cowl_design(theta1,theta2,beta1,beta2,L,L2)
-    disp('Cowl design...')
+    disp('Desinging the Cowl...')
     x_cowl = [];
     y_cowl = [];
     tolerance = 0.001;

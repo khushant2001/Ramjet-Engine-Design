@@ -1,27 +1,8 @@
-%Combustor
-clear; clc; close;
-
-% function [mach_out, T_out, P_out. Area_out] = combustor(T_in,P_in,T_0_in,M_in,fuel_mass)
-% end
-
-%To-Do
-%Change Function Structure to be T_in and T_out
-%Added Section to Find Length of Combustor 
-
-%Test
-T_in = 300; %k Temperature
-T0_in = 273;
-P_in = 101325; %Pa Pressure
-P_atm = 101325; %Pa Atmospheric Pressure
-mach_in = 0.2; %Inlet Mach Numbeer
-fuel_mass = 100; %kg Mass of Fuel
-gaama = 1.4; %Specific Heat Ratio of Working Fluid
-
-[T_out,P_out,mach_out, combustor_length] = combustor(T_in, P_in, mach_in, T0_in, fuel_mass, gaama, P_atm); %Call Function
-
-function [T_out,P_out,mach_out,combustor_length] = combustor(T_in, P_in, mach_in, T0_in, fuel_mass, gaama, P_atm)
+function [T_out,P_out,mach_out,combustor_length] = combustor(T_in, P_in, mach_in, fuel_mass, gaama)
     
-    Heat_val = 120*10^3; %kJ/kg Lower Heating Value of H2
+    disp("Calculating Properties Across Combustor ...")
+    [T0_in,~] = stagnation_values(T_in,P_in,mach_in);
+    Heat_val = 120*10^6; %J/kg Lower Heating Value of H2
     q = Heat_val*fuel_mass; %kJ
     R = 287;
 
@@ -58,12 +39,18 @@ function [T_out,P_out,mach_out,combustor_length] = combustor(T_in, P_in, mach_in
     P_out = P_02 / (1 + (gaama-1)  *.5*mach_out^2)^(gaama/(gaama-1));
 
     %Finding Length of Combustor
-    tao = 325*(P_out/101325)^(1.6) *exp(-0.8*T0_in/1000)*10^(-6); %Time Fuel took To Burn
+    tao = 325*(P_out/101325)^(-1.6)*exp(-0.8*T_out/1000)*10^(-6); %Time Fuel took To Burn
     v_in = mach_in*sqrt(gaama*R*T_in); %m/s Inlet Velocity of Fuel
     v_out = mach_out*sqrt(gaama*R*T_out); %m/s Inlet Velocity of Fuel
     combustor_length = 0.5*(v_in+v_out)*tao; %m Length of Combustor
-    disp(['Combustor Length = ', num2str(combustor_length)]);
+    disp(['... Combustor Length = ', num2str(combustor_length)]);
 
     %Finding Area Out
 
+end
+
+function [T_02, P_02] = stagnation_values(T,P,M)
+    gaama = 1.4;
+    T_02 = T*(1 + .5*(gaama-1)*M^2);
+    P_02 = P*(1+.5*(gaama-1)*M^2)^(gaama/(gaama-1));
 end

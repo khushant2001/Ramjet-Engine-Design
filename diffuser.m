@@ -8,7 +8,7 @@
 % 4. How do we include the temperature limits. 
 function [x,A2,M_req,P3,T3] = diffuser(M_in, T_in, P_in,A_in,T_inf,M_inf)
     
-    disp("Diffuser design...");
+    disp("Calculating Properties Across Diffuser ...")
     % Defininng initial properties!
     gaama = 1.4;
     M2 = M_in;
@@ -21,7 +21,7 @@ function [x,A2,M_req,P3,T3] = diffuser(M_in, T_in, P_in,A_in,T_inf,M_inf)
     i = 0; % Need to figure out how to get the x points. So this can be deleted. 
     
     % Finding T3, at exit of diffuser, to maintain isentropic flow!
-    T3_final = 642; %T_inf*(1 + .5*(gaama-1)*M_inf^2); % This is to completely stop the flow!
+    T3_final = 659; %T_inf*(1 + .5*(gaama-1)*M_inf^2); % This is to completely stop the flow!
 
     % Defining arrays to store future state properties. 
     A2 = [A_in];
@@ -34,7 +34,6 @@ function [x,A2,M_req,P3,T3] = diffuser(M_in, T_in, P_in,A_in,T_inf,M_inf)
         disp("ERROR: DIFFUSER CANT INCREASE FLOW SPEED!!");
     else
         while M2 >= M_req % This NEEDS TO BE FIXED!
-            disp(A2)
             M_out = [M_out,M2];
             i = i+1;
             M2 = M2 - .005;

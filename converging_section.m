@@ -1,7 +1,7 @@
 % This is used to compress the subsonic flow to sonic and find the
 % conditions at the choked condition. 
 
-function [] = converging_section(M_in, T_in, P_in,A_in)
+function [M_out,T2,P2,x,A2] = converging_section(M_in, T_in, P_in,A_in)
     % Defininng initial properties!
     gaama = 1.4;
     M2 = M_in;
@@ -13,7 +13,7 @@ function [] = converging_section(M_in, T_in, P_in,A_in)
     i = 0; % Need to figure out how to get the x points. So this can be deleted. 
 
     % Defining arrays to store future state properties. 
-    A2 = [];
+    A2 = [A_in];
     T2 = [];
     P2 = [];
     M_out = [];
@@ -26,8 +26,7 @@ function [] = converging_section(M_in, T_in, P_in,A_in)
         T2 = [T2,T_0/(1+.5*(gaama-1)*M2^2)];
         P2 = [P2,P_0/((1+.5*(gaama-1)*M2^2)^(gaama/(gaama-1)))];
     end
-    x = linspace(0,i,i);
-    figure
-    plot(x,A2)
-    title("Converging section")
+    x = linspace(0,i,i+1);
+    A2 = [A2,-A2];
+    x = [x,x];
 end
