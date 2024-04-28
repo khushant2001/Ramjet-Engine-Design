@@ -21,13 +21,17 @@ function [x,A2,M_req,P3,T3] = diffuser(M_in, T_in, P_in,A_in,T_inf,M_inf)
     i = 0; % Need to figure out how to get the x points. So this can be deleted. 
     
     % Finding T3, at exit of diffuser, to maintain isentropic flow!
-    T3_final = 659; %T_inf*(1 + .5*(gaama-1)*M_inf^2); % This is to completely stop the flow!
+    T3_final = 650; %T_inf*(1 + .5*(gaama-1)*M_inf^2); % This is to completely stop the flow!
 
     % Defining arrays to store future state properties. 
     A2 = [A_in];
     T3 = [];
     P3 = [];
     M_req = sqrt((2/(gaama-1))*((T_inf/T3_final)*(1+.5*(gaama-1)*M_inf^2)-1));
+    if imag(M_req) ~= 0
+        disp("...ERROR! DIFFUSER ERROR. CAN'T ATTAIN THE REQUIRED TEMPERATURE!")
+    end
+
     M_out = [];
     
     if M2 <= M_req
@@ -43,7 +47,7 @@ function [x,A2,M_req,P3,T3] = diffuser(M_in, T_in, P_in,A_in,T_inf,M_inf)
             P3 = [P3,P_0/((1+.5*(gaama-1)*M2^2)^(gaama/(gaama-1)))];
         end
     end
-    x = linspace(0,i,i+1);
+    x = linspace(0,3*(A2(end)-A2(1)),length(A2));
     x = [x,x];
     A2 = [A2,-A2];
 end

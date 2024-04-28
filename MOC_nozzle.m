@@ -1,4 +1,4 @@
-function [x_wall,y_wall,P_out,T_out] = MOC_nozzle(n,mach_exit, P_star, T_star)
+function [x_wall,y_wall,P_out,T_out] = MOC_nozzle(n,mach_exit, P_star, T_star,inlet_area)
     
     disp("Calculating Properties Across Exit Nozzle ...")
     gaama = 1.4;
@@ -54,7 +54,7 @@ function [x_wall,y_wall,P_out,T_out] = MOC_nozzle(n,mach_exit, P_star, T_star)
                 % Calculating the x and y position for the points on the
                 % wall
                 if i == 1
-                    value{1}(1) = -1/tand(.5*c_minus_values{1}(1) - .5*(c_minus_values{1}(4) + value{1}(6)));
+                    value{1}(1) = -inlet_area/tand(.5*c_minus_values{1}(1) - .5*(c_minus_values{1}(4) + value{1}(6)));
                 else
                     previous_wave = c_plus{i-1};
                     temp_keys = keys(previous_wave);
@@ -91,7 +91,7 @@ function [x_wall,y_wall,P_out,T_out] = MOC_nozzle(n,mach_exit, P_star, T_star)
                     number = tand(value{1}(3) + v_temp{1}(6));
                     number2 = tand(.5*(theta_max + value{1}(3)));
                     A = [1,-number;1,-number2];
-                    b = [v_temp{1}(2) - v_temp{1}(1)*number;1];
+                    b = [v_temp{1}(2) - v_temp{1}(1)*number;inlet_area];
                 else
                     number = tand(value{1}(3) + v_temp{1}(6));
                     previous_wave = c_plus{i-1};
@@ -143,7 +143,7 @@ function [x_wall,y_wall,P_out,T_out] = MOC_nozzle(n,mach_exit, P_star, T_star)
                 number = tand((x(1) + v_temp{1}(3))*.5 + .5*(value{1}(6) + v_temp{1}(6)));
                 number2 = tand((x(1) + c_minus_values{1}(1))*.5 - .5*(value{1}(6) + v_temp{1}(6)));
                 A = [1,-number;1,-number2];
-                b = [v_temp{1}(2) - v_temp{1}(1)*number;1];
+                b = [v_temp{1}(2) - v_temp{1}(1)*number;inlet_area];
                 x = linsolve(A,b);
                 value{1}(1) = x(2);
                 value{1}(2) = x(1);
@@ -152,7 +152,7 @@ function [x_wall,y_wall,P_out,T_out] = MOC_nozzle(n,mach_exit, P_star, T_star)
             end
         end
     end
-    [x_wall,y_wall] = find_points(c_plus,wall);
+    [x_wall,y_wall] = find_points(c_plus,wall,inlet_area);
     last_wave = c_plus{end};
     last_wave_properties = values(last_wave);
     end_property = last_wave_properties(end);
@@ -216,13 +216,13 @@ function M = calc_mach(gaama,neu)
     end
 end
 
-function [x_wall,y_wall] = find_points(c_plus,wall)
-    x_wall = [];
-    y_wall = [];
+function [x_wall,y_wall] = find_points(c_plus,wall,inlet_area)
+    x_wall = [0];
+    y_wall = [inlet_area];
     for i = 1:length(wall)
         wave = c_plus{i};
         properties = wave(wall(i));
-        x_wall(i) = properties{1}(1);
-        y_wall(i) = properties{1}(2);
+        x_wall(i+1) = properties{1}(1);
+        y_wall(i+1) = properties{1}(2);
     end
 end

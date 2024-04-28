@@ -21,7 +21,7 @@ function [T_2, P_2, M_2,x_cowl,y_cowl,x,y,area] = inlet_design(mach_in, P_in, T_
     % Second step. Might need move this to find the best optimzation for
     % the given mach number.
     [M_22, t_ratio2, p_ratio2,beta2] = shock_relations(M_12,gaama,theta2,0,1,0);
-
+    disp(["...Mach Number going into normal shock", num2str(M_22)])
     % Normal shock at the end. 
     [M_2, t_ratio, p_ratio,~] = shock_relations(M_22,gaama,0,1,0,0);
     T_2 = T_in*t_ratio1*t_ratio2*t_ratio;

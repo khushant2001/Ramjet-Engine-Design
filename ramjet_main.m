@@ -1,13 +1,14 @@
-%{
+ %{
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Ramjet Engine Design %
     % Angel, Christos, Khushant %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %}
 
-% Thing to think about!
-% 1. Should have an x and y array passing around the functions to get the
-% location of every single component. 
+%% Things to take care of!
+% Get the turning geometry working!
+% Work on the combustor.
+
 clc
 clear 
 close all
@@ -24,46 +25,49 @@ R = 287;
 %T3 = 1500; % K. To prevent high temperatures! Need to talk about this
 T_tungsten = 1900; %K. Melting point of tungsten!
 
-%% Algorithm implementation!
+% Algorithm implementation!
 
-% Inlet
-[T2, P2, M2,x_cowl,y_cowl,x,y,inlet_area] = inlet_design(3.25,P1,T1,5,1);
-
-% Diffuser
+%% Inlet
+[T2, P2, M2,x_cowl,y_cowl,x,y,inlet_area] = inlet_design(mach_in,P1,T1,5,1);
+m_dot_in = (P2/(R*T2))*inlet_area*M2*sqrt(T2*gaama*R);
+%% Diffuser
 
 [x_diffuser,A_diffuser,M3,P3,T3] = diffuser(M2,T2,P2,inlet_area/2,T1,mach_in);
-diffuser_exit_area = A_diffuser(end/2);
+diffuser_exit_area = 2*A_diffuser(end/2);
 x_diffuser = x_diffuser + x(end);
 A_diffuser = A_diffuser + (y_cowl(2) - A_diffuser(1));
-
-% Flameholder
+m_dot3 = (P3(end)/(R*T3(end)))*diffuser_exit_area*M3(end)*sqrt(T3(end)*gaama*R);
+%% Flameholder
 P_3_prime = flameholder(P3(end),M3);
 
-% Combustor
-[T4,P4,M4,combustor_length] = combustor(T3(end), P_3_prime, M3, .007, 1.4);
+%% Combustor
+phi = .02;
+[T4,P4,M4,combustor_length,m_dot_fuel] = combustor(T3(end), P_3_prime, M3, phi,diffuser_exit_area);
 x_combustor = [x_diffuser(end/2),x_diffuser(end/2)+combustor_length];
 y_combustor = [A_diffuser(end/2),A_diffuser(end/2)];
+m_dot4 = (P4/(R*T4))*diffuser_exit_area*M4*sqrt(T4*gaama*R);
 
-% Converging section
-[M5,T5,P5,x_converging,A_converging] = converging_section(M4, T4, P4,diffuser_exit_area);
+%% Converging section
+[M5,T5,P5,x_converging,A_converging] = converging_section(M4, T4, P4,diffuser_exit_area/2);
 x_converging = x_converging + x_combustor(end);
 A_converging = A_converging + (y_combustor(end) - A_converging(1));
+throat_area = (A_converging(end/2)-A_converging(end));
+m_dot5 = (P5(end)/(R*T5(end)))*throat_area*M5(end)*sqrt(T5(end)*gaama*R);
 
-% Nozzle
+%% Nozzle
 n = 20;
-M6 = 3;
-[x_wall,y_wall,P_out,T_out] = MOC_nozzle(n,M6, P5(end), T5(end));
+M6 = 3.5;
+[x_wall,y_wall,P6,T6] = MOC_nozzle(n,M6, P5(end), T5(end),throat_area/2);
+exit_area = y_wall(end)*2;
 x_wall = [x_wall,x_wall];
 y_wall = [y_wall,-y_wall];
 x_wall = x_wall + x_converging(end/2);
 y_wall = y_wall + (A_converging(end/2)-y_wall(1));
-x_wall = [x_converging(end/2),x_wall(1:end/2),x_converging(end),x_wall(1+end/2:end)];
-y_wall = [A_converging(end/2),y_wall(1:end/2),A_converging(end),y_wall(1+end/2:end)];
+
+m_out = (P6/(R*T6))*M6*sqrt(gaama*R*T6)*exit_area;
 
 %% Thrust Calcs
-exit_area = y_wall(end/2) - y_wall(end);
-m_dot = (P1/(R*T1))*inlet_area*mach_in*sqrt(T1*gaama*R);
-thrust = thrust_calcs(P1,P_out,T1,T_out,mach_in,M6,m_dot,inlet_area,exit_area,1);
+thrust = thrust_calcs(P1,P6,T1,T6,mach_in,M6,m_dot_in,inlet_area,exit_area,m_dot_fuel,x_wall(end));
 
 %% Plotting the engine!
 figure
@@ -75,5 +79,13 @@ plot(x_diffuser(1+end/2:end), A_diffuser(1+end/2:end), 'go-', 'MarkerSize', 10, 
 plot(x_combustor, y_combustor, 'ro-', 'MarkerSize', 10, 'LineWidth', 2)
 plot(x_converging(1:end/2), A_converging(1:end/2), 'bo-', 'MarkerSize', 10, 'LineWidth', 2)
 plot(x_converging(1+end/2:end), A_converging(1+end/2:end), 'bo-', 'MarkerSize', 10, 'LineWidth', 2)
-%plot(x_wall(1:end/2),y_wall(1:end/2), 'go-', 'MarkerSize', 10, 'LineWidth', 2)
-%plot(x_wall(1+end/2:end),y_wall(1+end/2:end), 'go-', 'MarkerSize', 10, 'LineWidth', 2)
+plot(x_wall(1:end/2),y_wall(1:end/2), 'go-', 'MarkerSize', 10, 'LineWidth', 2)
+plot(x_wall(1+end/2:end),y_wall(1+end/2:end), 'go-', 'MarkerSize', 10, 'LineWidth', 2)
+grid on
+box off
+legend('Inlet','Cowl','Diffuser','Diffuser','Combustor','Converging Nozzle','Converging Nozzle','Diverging Nozzle','Diverging Nozzle',Location='east')
+set(gcf, 'Color', 'white');
+set(gca, 'FontSize', 18);
+title("Final Design")
+xlabel("X [m]")
+ylabel("Y [m]")
