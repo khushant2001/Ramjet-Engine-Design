@@ -206,7 +206,7 @@ end
 
 function M = calc_mach(gaama,neu)
     M = 0;
-    tolerance = 0.0001;
+    tolerance = 0.00001;
     while 1
         if  neu - calc_neu(gaama,M) < tolerance
             break

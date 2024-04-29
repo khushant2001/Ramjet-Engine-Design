@@ -21,9 +21,14 @@ function [T_2, P_2, M_2,x_cowl,y_cowl,x,y,area] = inlet_design(mach_in, P_in, T_
     % Second step. Might need move this to find the best optimzation for
     % the given mach number.
     [M_22, t_ratio2, p_ratio2,beta2] = shock_relations(M_12,gaama,theta2,0,1,0);
-    disp(["...Mach Number going into normal shock", num2str(M_22)])
+
     % Normal shock at the end. 
     [M_2, t_ratio, p_ratio,~] = shock_relations(M_22,gaama,0,1,0,0);
+    
+    if imag(M_22) ~= 0 || M_22>M_12
+        disp('ERROR!!!! FLOW CANT BE TURNED THIS MUCH.')
+        return
+    end
     T_2 = T_in*t_ratio1*t_ratio2*t_ratio;
     P_2 = P_in*p_ratio1*p_ratio2*p_ratio;
 
@@ -31,8 +36,8 @@ function [T_2, P_2, M_2,x_cowl,y_cowl,x,y,area] = inlet_design(mach_in, P_in, T_
     [x_cowl,y_cowl] = cowl_design(theta1,theta2,beta1,beta2,L1,L2);
 
     % Generating points for the inlet
-    x = [0,L1*cosd(theta1),x_cowl(2)];
-    y = [0,L1*sind(theta1),tand(theta2)*x_cowl(2)];
+    x = [0,L1*cosd(theta1),x_cowl(end)];
+    y = [0,L1*sind(theta1),L1*sind(theta1)+L2*sind(theta2)];
 
     % Determining the inlet_area
     theta_temp = atand((y_cowl(1) - y(2))/(x_cowl(1) - x(2))) - theta2;
@@ -47,8 +52,8 @@ end
 function [theta1,theta2] = find_angles(mach_in, P_in)
     gaama = 1.4;
     [~,P_01] = stagnation_values(0,P_in,mach_in);
-    theta_1 = linspace(15,20,100);
-    theta_2 = linspace(20,20,100);
+    theta_1 = linspace(1,30,10);
+    theta_2 = linspace(20,20,10);
     ratios = zeros(length(theta_1),length(theta_2));
 
     % Running a 2d loop!

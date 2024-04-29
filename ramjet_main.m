@@ -28,21 +28,23 @@ T_tungsten = 1900; %K. Melting point of tungsten!
 % Algorithm implementation!
 
 %% Inlet
-[T2, P2, M2,x_cowl,y_cowl,x,y,inlet_area] = inlet_design(mach_in,P1,T1,5,1);
+[T2, P2, M2,x_cowl,y_cowl,x,y,inlet_area] = inlet_design(mach_in,P1,T1,1,1);
 m_dot_in = (P2/(R*T2))*inlet_area*M2*sqrt(T2*gaama*R);
 %% Diffuser
 
 [x_diffuser,A_diffuser,M3,P3,T3] = diffuser(M2,T2,P2,inlet_area/2,T1,mach_in);
 diffuser_exit_area = 2*A_diffuser(end/2);
-x_diffuser = x_diffuser + x(end);
+x_diffuser = x_diffuser + x_cowl(end);
 A_diffuser = A_diffuser + (y_cowl(2) - A_diffuser(1));
 m_dot3 = (P3(end)/(R*T3(end)))*diffuser_exit_area*M3(end)*sqrt(T3(end)*gaama*R);
+
 %% Flameholder
-P_3_prime = flameholder(P3(end),M3);
+% TODO! FIX THIS
+[P3_prime,T3_prime] = flameholder(P3(end),M3,T3(end));
 
 %% Combustor
-phi = .02;
-[T4,P4,M4,combustor_length,m_dot_fuel] = combustor(T3(end), P_3_prime, M3, phi,diffuser_exit_area);
+phi = .2;
+[T4,P4,M4,combustor_length,m_dot_fuel] = combustor(T3(end), P3_prime, M3, phi,diffuser_exit_area);
 x_combustor = [x_diffuser(end/2),x_diffuser(end/2)+combustor_length];
 y_combustor = [A_diffuser(end/2),A_diffuser(end/2)];
 m_dot4 = (P4/(R*T4))*diffuser_exit_area*M4*sqrt(T4*gaama*R);
@@ -66,24 +68,32 @@ y_wall = y_wall + (A_converging(end/2)-y_wall(1));
 
 m_out = (P6/(R*T6))*M6*sqrt(gaama*R*T6)*exit_area;
 
+%% Overall Shell
+x_shell = [0,x_wall(end),0,x_wall(end)];
+y_shell = [y_wall(end/2),y_wall(end/2),y_wall(end),y_wall(end)];
+
 %% Thrust Calcs
-thrust = thrust_calcs(P1,P6,T1,T6,mach_in,M6,m_dot_in,inlet_area,exit_area,m_dot_fuel,x_wall(end));
+total_inlet_area = y_shell(end/2)-y_shell(end);
+thrust = thrust_calcs(P1,P2,P6,T1,T6,mach_in,M6,m_dot_in,inlet_area,total_inlet_area,exit_area,m_dot_fuel,x_wall(end));
+%m_dot_total = (P1/(R*T1))*total_inlet_area*mach_in*sqrt(gaama*R*T1);
 
 %% Plotting the engine!
 figure
 hold on
 plot(x, y, 'ro-', 'MarkerSize', 10, 'LineWidth', 2)
-plot(x_cowl,y_cowl,'bo-', 'MarkerSize', 10, 'LineWidth', 2)
+plot(x_cowl,y_cowl,'ko-', 'MarkerSize', 10, 'LineWidth', 2)
 plot(x_diffuser(1:end/2), A_diffuser(1:end/2), 'go-', 'MarkerSize', 10, 'LineWidth', 2)
 plot(x_diffuser(1+end/2:end), A_diffuser(1+end/2:end), 'go-', 'MarkerSize', 10, 'LineWidth', 2)
-plot(x_combustor, y_combustor, 'ro-', 'MarkerSize', 10, 'LineWidth', 2)
+plot(x_combustor, y_combustor, 'co-', 'MarkerSize', 10, 'LineWidth', 2)
 plot(x_converging(1:end/2), A_converging(1:end/2), 'bo-', 'MarkerSize', 10, 'LineWidth', 2)
 plot(x_converging(1+end/2:end), A_converging(1+end/2:end), 'bo-', 'MarkerSize', 10, 'LineWidth', 2)
-plot(x_wall(1:end/2),y_wall(1:end/2), 'go-', 'MarkerSize', 10, 'LineWidth', 2)
-plot(x_wall(1+end/2:end),y_wall(1+end/2:end), 'go-', 'MarkerSize', 10, 'LineWidth', 2)
+plot(x_wall(1:end/2),y_wall(1:end/2), 'mo-', 'MarkerSize', 10, 'LineWidth', 2)
+plot(x_wall(1+end/2:end),y_wall(1+end/2:end), 'mo-', 'MarkerSize', 10, 'LineWidth', 2)
+plot(x_shell(1:end/2),y_shell(1:end/2), 'b*-', 'MarkerSize', 10, 'LineWidth', 2)
+plot(x_shell(1+end/2:end),y_shell(1+end/2:end), 'b*-', 'MarkerSize', 10, 'LineWidth', 2)
 grid on
 box off
-legend('Inlet','Cowl','Diffuser','Diffuser','Combustor','Converging Nozzle','Converging Nozzle','Diverging Nozzle','Diverging Nozzle',Location='east')
+legend('Inlet','Cowl','Diffuser','Diffuser','Combustor','Converging Nozzle','Converging Nozzle','Diverging Nozzle','Diverging Nozzle','Casing',Location='east')
 set(gcf, 'Color', 'white');
 set(gca, 'FontSize', 18);
 title("Final Design")

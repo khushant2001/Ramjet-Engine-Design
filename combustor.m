@@ -16,6 +16,7 @@ function [T_out,P_out,mach_out,combustor_length,m_dot_fuel] = combustor(T_in, P_
     q_dot = m_dot_fuel*Heat_val;
     q = q_dot/m_dot;
     disp(['...Heat Added to the Air Mixture = ', num2str(q)])
+    disp(['...Mass flow rate of fuel = ', num2str(m_dot_fuel)])
     % Finding the stagnation temperature and pressure
     [T_01,P_01] = stagnation_values(T_in,P_in,mach_in);
     
