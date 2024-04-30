@@ -20,12 +20,13 @@ function [M_out,T2,P2,x,A2] = converging_section(M_in, T_in, P_in,A_in)
     while M2 <= 1.0
         M_out = [M_out,M2];
         i = i+1;
-        M2 = M2 + .005;
+        M2 = M2 + .001;
         area_ratio = (M2/M_in)*((1+.5*(gaama-1)*M_in^2)/(1+.5*(gaama-1)*M2^2))^((gaama+1)/(2*(gaama-1)));
         A2 = [A2,A1/area_ratio];
         T2 = [T2,T_0/(1+.5*(gaama-1)*M2^2)];
         P2 = [P2,P_0/((1+.5*(gaama-1)*M2^2)^(gaama/(gaama-1)))];
     end
+    M_out = 1.0;
     x = linspace(0,1*(A2(1)-A2(end)),length(A2));
     A2 = [A2,-A2];
     x = [x,x];

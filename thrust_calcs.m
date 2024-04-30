@@ -10,8 +10,8 @@ function [thrust] = thrust_calcs(P_in,P2,P_out,T_in,T_out,M_in,M_out,m_dot,A_in,
     specific_thrust = thrust/m_dot;
     specfic_fuel_consumption = m_dot_fuel/thrust;
     specfic_impulse = thrust/(9.81*m_dot_fuel);
-    disp(['...Specific Thrust = ', num2str(specific_thrust)])
-    disp(['...Specific Fuel Consumption = ', num2str(specfic_fuel_consumption)])
-    disp(['...Specific Impulse = ', num2str(specfic_impulse)])
+    disp(['...Specific Thrust = ', num2str(specific_thrust), ' m/sec'])
+    disp(['...Specific Fuel Consumption = ', num2str(specfic_fuel_consumption), ' sec/m'])
+    disp(['...Specific Impulse = ', num2str(specfic_impulse), ' sec'])
     disp(['...Total Thrust Produced = ', num2str(thrust), ' N'])
 end

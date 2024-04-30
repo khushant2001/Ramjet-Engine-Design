@@ -20,6 +20,7 @@ mach_in = 3.25;
 [T1, P1] = atmospheric(elevation);  
 gaama = 1.4;
 R = 287;
+
 %% Imposed conditions!
 
 %T3 = 1500; % K. To prevent high temperatures! Need to talk about this
@@ -29,7 +30,8 @@ T_tungsten = 1900; %K. Melting point of tungsten!
 
 %% Inlet
 [T2, P2, M2,x_cowl,y_cowl,x,y,inlet_area] = inlet_design(mach_in,P1,T1,1,1);
-m_dot_in = (P2/(R*T2))*inlet_area*M2*sqrt(T2*gaama*R);
+m_dot1 = (P1/(R*T1))*inlet_area*mach_in*sqrt(gaama*R*T1);
+m_dot2 = (P2/(R*T2))*inlet_area*M2*sqrt(T2*gaama*R);
 %% Diffuser
 
 [x_diffuser,A_diffuser,M3,P3,T3] = diffuser(M2,T2,P2,inlet_area/2,T1,mach_in);
@@ -40,11 +42,12 @@ m_dot3 = (P3(end)/(R*T3(end)))*diffuser_exit_area*M3(end)*sqrt(T3(end)*gaama*R);
 
 %% Flameholder
 % TODO! FIX THIS
-[P3_prime,T3_prime] = flameholder(P3(end),M3,T3(end));
+[P3_prime,T3_prime,M3_prime] = flameholder(P3(end),M3,T3(end));
+m_dot3_prime = (P3_prime/(R*T3_prime))*diffuser_exit_area*M3_prime*sqrt(gaama*R*T3_prime);
 
 %% Combustor
 phi = .2;
-[T4,P4,M4,combustor_length,m_dot_fuel] = combustor(T3(end), P3_prime, M3, phi,diffuser_exit_area);
+[T4,P4,M4,combustor_length,m_dot_fuel] = combustor(T3_prime, P3_prime, M3_prime, phi,diffuser_exit_area);
 x_combustor = [x_diffuser(end/2),x_diffuser(end/2)+combustor_length];
 y_combustor = [A_diffuser(end/2),A_diffuser(end/2)];
 m_dot4 = (P4/(R*T4))*diffuser_exit_area*M4*sqrt(T4*gaama*R);
@@ -66,7 +69,7 @@ y_wall = [y_wall,-y_wall];
 x_wall = x_wall + x_converging(end/2);
 y_wall = y_wall + (A_converging(end/2)-y_wall(1));
 
-m_out = (P6/(R*T6))*M6*sqrt(gaama*R*T6)*exit_area;
+m_dot6 = (P6/(R*T6))*M6*sqrt(gaama*R*T6)*exit_area;
 
 %% Overall Shell
 x_shell = [0,x_wall(end),0,x_wall(end)];
@@ -74,7 +77,7 @@ y_shell = [y_wall(end/2),y_wall(end/2),y_wall(end),y_wall(end)];
 
 %% Thrust Calcs
 total_inlet_area = y_shell(end/2)-y_shell(end);
-thrust = thrust_calcs(P1,P2,P6,T1,T6,mach_in,M6,m_dot_in,inlet_area,total_inlet_area,exit_area,m_dot_fuel,x_wall(end));
+thrust = thrust_calcs(P1,P2,P6,T1,T6,mach_in,M6,m_dot2,inlet_area,total_inlet_area,exit_area,m_dot_fuel,x_wall(end));
 %m_dot_total = (P1/(R*T1))*total_inlet_area*mach_in*sqrt(gaama*R*T1);
 
 %% Plotting the engine!
