@@ -7,7 +7,7 @@
 % How to find the point where the cowl exists! - DONE
 % WHAT IS THE MINIMUM amount that the flow needs to be turned!!!
 
-function [T_2, P_2, M_2,x_cowl,y_cowl,x,y,area] = inlet_design(mach_in, P_in, T_in,L1,L2)
+function [T_2, P_2, M_2,x_cowl,y_cowl,x,y,area,theta1,theta2] = inlet_design(mach_in, P_in, T_in,L1,L2)
     
     disp("Calculating Properties Across Inlet...");
     gaama = 1.4;
@@ -52,8 +52,8 @@ end
 function [theta1,theta2] = find_angles(mach_in, P_in)
     gaama = 1.4;
     [~,P_01] = stagnation_values(0,P_in,mach_in);
-    theta_1 = linspace(1,30,10);
-    theta_2 = linspace(20,20,10);
+    theta_1 = linspace(5,10,10);
+    theta_2 = linspace(10,20,10);
     ratios = zeros(length(theta_1),length(theta_2));
 
     % Running a 2d loop!

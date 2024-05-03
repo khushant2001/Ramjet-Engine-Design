@@ -1,4 +1,4 @@
-function [x_wall,y_wall,P_out,T_out] = MOC_nozzle(n,mach_exit, P_star, T_star,inlet_area)
+function [x_wall,y_wall,P_out,T_out,M_out,c_plus] = MOC_nozzle(n,mach_exit, P_star, T_star,inlet_area)
     
     disp("Calculating Properties Across Exit Nozzle ...")
     gaama = 1.4;
@@ -58,7 +58,7 @@ function [x_wall,y_wall,P_out,T_out] = MOC_nozzle(n,mach_exit, P_star, T_star,in
                 else
                     previous_wave = c_plus{i-1};
                     temp_keys = keys(previous_wave);
-                    index = temp_keys(2);
+                    index = temp_keys(j+1);
                     previous_values = previous_wave(index);
                     number = tand(.5*(previous_values{1}(3)) - .5*(value{1}(6) + previous_values{1}(6)));
                     value{1}(1) = -previous_values{1}(2)/number + previous_values{1}(1);
@@ -128,8 +128,8 @@ function [x_wall,y_wall,P_out,T_out] = MOC_nozzle(n,mach_exit, P_star, T_star,in
                 A = [1,-1;1,1];
                 b = [k_plus;k_minus];
                 x = linsolve(A,b);
-                value{1}(3) = x(1);
-                value{1}(4) = x(2);
+                value{1}(3) = x(1); %theta
+                value{1}(4) = x(2); % neu
 
                 % Updating other values as before!
                 value{1}(5) = calc_mach(gaama, value{1}(4));
@@ -140,10 +140,25 @@ function [x_wall,y_wall,P_out,T_out] = MOC_nozzle(n,mach_exit, P_star, T_star,in
                 value{1}(9) = T_0/(1 + .5*(gaama-1)*value{1}(5)^2);
 
                 % Calculating the x and y position
-                number = tand((x(1) + v_temp{1}(3))*.5 + .5*(value{1}(6) + v_temp{1}(6)));
-                number2 = tand((x(1) + c_minus_values{1}(1))*.5 - .5*(value{1}(6) + v_temp{1}(6)));
-                A = [1,-number;1,-number2];
-                b = [v_temp{1}(2) - v_temp{1}(1)*number;inlet_area];
+                if i ==1
+                    number2 = tand((x(1) + v_temp{1}(3))*.5 + .5*(value{1}(6) + v_temp{1}(6)));
+                    number = tand((x(1) + c_minus_values{1}(1))*.5 - .5*(value{1}(6) + c_minus_values{1}(4)));
+                    A = [1,-number2;1,-number];
+                    b = [v_temp{1}(2) - v_temp{1}(1)*number2;inlet_area];
+                else
+                    previous_wave = c_plus{i-1};
+                    temp_keys = keys(previous_wave);
+                    index = temp_keys(j+1);
+                    previous_values = previous_wave(index);
+                    theta3 = value{1}(3);
+                    theta1 = previous_values{1}(3);
+                    mu3 = value{1}(6);
+                    mu1 = previous_values{1}(6);
+                    number = tand((theta3+theta1-mu3-mu1)/2);
+                    number2 = tand((theta3+v_temp{1}(3)+mu3+v_temp{1}(6))/2);
+                    A = [1,-number2;1,-number];
+                    b = [v_temp{1}(2)-number2*v_temp{1}(1);previous_values{1}(2)-number*previous_values{1}(1)];
+                end
                 x = linsolve(A,b);
                 value{1}(1) = x(2);
                 value{1}(2) = x(1);
@@ -158,6 +173,7 @@ function [x_wall,y_wall,P_out,T_out] = MOC_nozzle(n,mach_exit, P_star, T_star,in
     end_property = last_wave_properties(end);
     P_out = end_property{1}(10);
     T_out = end_property{1}(9);
+    M_out = end_property{1}(5);
 end
 
 function [c_plus, c_minus,wall,centerline] = characteristic_lines(n,gaama,theta_max)

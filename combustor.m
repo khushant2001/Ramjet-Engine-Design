@@ -1,9 +1,9 @@
 % This is the code for the combustor. You need to specify the inlet
 % conditions: T_in,P_in,Mach_in,phi, area_in
 
-function [T_out,P_out,mach_out,combustor_length,m_dot_fuel] = combustor(T_in, P_in, mach_in,phi,area_in)
+function [T_out,P_out,mach_out,combustor_length,m_dot_fuel,tao] = combustor(T_in, P_in, mach_in,phi,area_in)
     
-    disp("Calculating Properties Across Combustor ...")
+    %disp("Calculating Properties Across Combustor ...")
 
     % Declaring constants!
     gaama = 1.4;
@@ -15,8 +15,8 @@ function [T_out,P_out,mach_out,combustor_length,m_dot_fuel] = combustor(T_in, P_
     m_dot_fuel = phi*.0291* m_dot;
     q_dot = m_dot_fuel*Heat_val;
     q = q_dot/m_dot;
-    disp(['...Heat Added to the Air Mixture = ', num2str(q)])
-    disp(['...Mass flow rate of fuel = ', num2str(m_dot_fuel)])
+    %disp(['...Heat Added to the Air Mixture = ', num2str(q)])
+    %disp(['...Mass flow rate of fuel = ', num2str(m_dot_fuel)])
     % Finding the stagnation temperature and pressure
     [T_01,P_01] = stagnation_values(T_in,P_in,mach_in);
     
@@ -37,7 +37,6 @@ function [T_out,P_out,mach_out,combustor_length,m_dot_fuel] = combustor(T_in, P_
         exp2 = (gaama+1)*mach_out^2*(2 + (gaama-1)*mach_out^2)/(1 + gaama*mach_out^2)^2;
         if exp1-exp2 < tolerance || mach_out > 1
             if mach_out > 1
-                disp("h")
                 mach_out = 0;
             end
             break
@@ -45,7 +44,10 @@ function [T_out,P_out,mach_out,combustor_length,m_dot_fuel] = combustor(T_in, P_
             mach_out = mach_out + 0.0001;
         end
     end
-    
+    if mach_out == 0
+        disp("...ERROR! TOO MUCH HEAT ADDED")
+        return
+    end
     P_02 = P0_star*((1+gaama)/(1+gaama*mach_out^2))*((2+mach_out^2*(gaama-1))/(gaama+1))^(gaama/(gaama-1));
     T_out = T_02 / (1 + (gaama-1)*.5*mach_out^2);
     P_out = P_02 / (1 + (gaama-1)  *.5*mach_out^2)^(gaama/(gaama-1));
@@ -55,7 +57,7 @@ function [T_out,P_out,mach_out,combustor_length,m_dot_fuel] = combustor(T_in, P_
     v_in = mach_in*sqrt(gaama*R*T_in); %m/s Inlet Velocity of Fuel
     v_out = mach_out*sqrt(gaama*R*T_out); %m/s Inlet Velocity of Fuel
     combustor_length = 0.5*(v_in+v_out)*tao; %m Length of Combustor
-    disp(['... Combustor Length = ', num2str(combustor_length)]);
+    %disp(['... Combustor Length = ', num2str(combustor_length)]);
 end
 
 function [T_02, P_02] = stagnation_values(T,P,M)

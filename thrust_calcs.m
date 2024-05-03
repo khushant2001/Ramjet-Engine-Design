@@ -1,10 +1,10 @@
-function [thrust] = thrust_calcs(P_in,P2,P_out,T_in,T_out,M_in,M_out,m_dot,A_in,total_A_in,A_out,m_dot_fuel,total_length)
+function [thrust,specific_thrust,specfic_fuel_consumption,specfic_impulse] = thrust_calcs(P_in,P2,P_out,T_in,T_out,M_in,M_out,m_dot,A_in,total_A_in,A_out,m_dot_fuel,total_length)
     disp("Finding the Final Thrust and Other Characteristics ...")
     R = 287;
     gaama = 1.4;
     v_in = M_in*sqrt(R*gaama*T_in);
     v_out = M_out*sqrt(R*gaama*T_out);
-    thrust_solo = m_dot*(v_out-v_in) - P_out*A_out + P2*A_in + P_in*(total_A_in-A_in);
+    thrust_solo = m_dot*(v_out-v_in) + P_out*A_out - P_in*A_in;
     drag = 0;
     thrust = thrust_solo - drag;
     specific_thrust = thrust/m_dot;
