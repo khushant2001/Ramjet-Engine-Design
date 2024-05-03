@@ -33,7 +33,6 @@ function [x,A2,M_req,P3,T3] = diffuser(M_in, T_in, P_in,A_in,T_inf,M_inf)
     else
         while M2 >= M_req % This NEEDS TO BE FIXED!
             M_out = [M_out,M2];
-            i = i+1;
             M2 = M2 - .0005;
             area_ratio = (M2/M_in)*((1+.5*(gaama-1)*M_in^2)/(1+.5*(gaama-1)*M2^2))^((gaama+1)/(2*(gaama-1)));
             A2 = [A2,A_in/area_ratio];

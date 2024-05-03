@@ -2,7 +2,7 @@
 % flameholder section. 
 
 function [P3_prime,T3_prime,M3_prime] = flameholder(P3, M3,T3)
-    disp("Calculating Properties Across Flameholder ...")
+    %disp("Calculating Properties Across Flameholder ...")
     
     % Declaring some constants!
     R = 287;
