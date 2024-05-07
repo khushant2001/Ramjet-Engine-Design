@@ -3,7 +3,7 @@
 % Things to take care of!
 % 1. What is unstart!
 
-function [x,A2,M_req,P3,T3] = diffuser(M_in, T_in, P_in,A_in,T_inf,M_inf)
+function [x,A2,M_req,P3,T3] = diffuser(M_in, T_in, P_in,A_in,T_inf,M_inf,M_req)
     
     disp("Calculating Properties Across Diffuser ...")
     % Defininng initial properties!
@@ -13,9 +13,7 @@ function [x,A2,M_req,P3,T3] = diffuser(M_in, T_in, P_in,A_in,T_inf,M_inf)
     % Finding stagnation values at the inlet. 
     T_0 = T_in*(1 + .5*(gaama-1)*M_in^2);
     P_0 = P_in*(1 + .5*(gaama-1)*M_in^2)^(gaama/(gaama-1));
-    
-    % Finding M3_final, at exit of diffuser, to maintain isentropic flow!
-    M_req = .2;
+   
     T3_final = T_inf/((M_req^2)/(2/(gaama-1))+1)/(1+.5*(gaama-1)*M_inf^2);
     % Defining arrays to store future state properties. 
     A2 = [A_in];

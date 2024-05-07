@@ -22,19 +22,23 @@ gaama = 1.4;
 R = 287;
 
 %% Imposed conditions!
-T_tungsten = 1900; %K. Melting point of tungsten!
-
+T_tungsten = 2500; %K. Melting point of tungsten!
+%https://apps.dtic.mil/sti/tr/pdf/AD0268647.pdf
+% https://www.scribd.com/document/674772278/History-of-Ramjet-Propulsion-Development-at-the-Marquardt-Company-1944-to-1970
+% Thrust produced = 1500 lbs or 6.6 kN
 % Algorithm implementation!
 
 for i = 1:length(mach_in)
     %% Inlet
-    [T2, P2, M2,x_cowl,y_cowl,x,y,inlet_area,theta1,theta2] = inlet_design(mach_in(i),P1,T1,1,1);
+    L1 = .2;
+    L2 = .1;
+    [T2, P2, M2,x_cowl,y_cowl,x,y,inlet_area,theta1,theta2,inlet_drag] = inlet_design(mach_in(i),P1,T1,L1,L2);
     m_dot1 = (P1/(R*T1))*y_cowl(2)*mach_in*sqrt(gaama*R*T1);
     m_dot2 = (P2/(R*T2))*inlet_area*M2*sqrt(T2*gaama*R);
     
     %% Diffuser
-    
-    [x_diffuser,A_diffuser,M3,P3,T3] = diffuser(M2,T2,P2,inlet_area/2,T1,mach_in(i));
+    M_req = .15; % This is the mach number u want the diffuser to stop flow at
+    [x_diffuser,A_diffuser,M3,P3,T3] = diffuser(M2,T2,P2,inlet_area/2,T1,mach_in(i),M_req);
     diffuser_exit_area = 2*A_diffuser(end/2);
     x_diffuser = x_diffuser + x_cowl(end);
     A_diffuser = A_diffuser + (y_cowl(2) - A_diffuser(1));
@@ -48,7 +52,7 @@ for i = 1:length(mach_in)
     %% Combustor
     % TODO! Itarate over the phi to get from the specified mach number to the
     % actual mach number. 
-    phi = .2;
+    phi = .5;
     [T4,P4,M4,combustor_length,m_dot_fuel,tao] = combustor(T3_prime, P3_prime, M3_prime, phi,diffuser_exit_area);
     x_combustor = [x_diffuser(end/2),x_diffuser(end/2)+combustor_length];
     y_combustor = [A_diffuser(end/2),A_diffuser(end/2)];
@@ -82,7 +86,7 @@ for i = 1:length(mach_in)
 
 
     %% Thrust Calcs
-    [thrust,~,~,~] = thrust_calcs(P1,P6,T1,T6,mach_in(i),M6,m_dot2,inlet_area,exit_area,m_dot_fuel,slope,abs(slope_b),distance,distance_b);
+    [thrust,~,~,~] = thrust_calcs(P1,P6,T1,T6,mach_in(i),M6,m_dot2,inlet_area,exit_area,m_dot_fuel,slope,abs(slope_b),distance,distance_b,inlet_drag);
     %m_dot_total = (P1/(R*T1))*total_inlet_area*mach_in*sqrt(gaama*R*T1);
 
     %% Saving the Area Profile for the final analysis
@@ -92,7 +96,7 @@ for i = 1:length(mach_in)
     else
         filename = 'Area profiles_max.mat';
     end
-    save(filename, 'A_diffuser', 'A_converging', 'y_wall','theta1','theta2','T1','P1','M4','slope','slope_b','distance','distance_b');
+    save(filename, 'A_diffuser', 'A_converging', 'y_wall','theta1','theta2','T1','P1','M4','slope','slope_b','distance','distance_b','L1','L2');
     
     %% Plotting the engine!
     figure
