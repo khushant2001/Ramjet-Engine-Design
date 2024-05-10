@@ -10,7 +10,6 @@ function [thrust,specific_thrust,specfic_fuel_consumption,specfic_impulse] = thr
     [~, ~, p_ratio1,~] = shock_relations(M_in,gaama,slope,0,1,0);
     [~, ~, p_ratio2,~] = shock_relations(M_in,gaama,slope_b,0,1,0);
     drag = P_in*p_ratio1*sind(slope)*distance + P_in*p_ratio2*sind(slope_b)*distance_b;
-    
     % Determining the total thrust!
     thrust = thrust_solo - drag - inlet_drag;
     specific_thrust = thrust/m_dot;

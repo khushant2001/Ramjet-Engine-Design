@@ -16,21 +16,20 @@ close all
 %% Inlet condtions!
 
 elevation = 16764; %m
-mach_in = [2.75,3.25]; % Having 2 designs and then comparing in the 'final_analysis file'.
+mach_in = [3.25]; % Having 2 designs and then comparing in the 'final_analysis file'.
 [T1, P1] = atmospheric(elevation);  
 gaama = 1.4;
 R = 287;
 
 %% Imposed conditions!
-T_tungsten = 2500; %K. Melting point of tungsten!
-%https://apps.dtic.mil/sti/tr/pdf/AD0268647.pdf
+T_max = 1800; %K. Melting point of tungsten!
 % https://www.scribd.com/document/674772278/History-of-Ramjet-Propulsion-Development-at-the-Marquardt-Company-1944-to-1970
 % Thrust produced = 1500 lbs or 6.6 kN
 % Algorithm implementation!
 
 for i = 1:length(mach_in)
     %% Inlet
-    L1 = .2;
+    L1 = .1;
     L2 = .1;
     [T2, P2, M2,x_cowl,y_cowl,x,y,inlet_area,theta1,theta2,inlet_drag] = inlet_design(mach_in(i),P1,T1,L1,L2);
     m_dot1 = (P1/(R*T1))*y_cowl(2)*mach_in*sqrt(gaama*R*T1);
@@ -52,13 +51,12 @@ for i = 1:length(mach_in)
     %% Combustor
     % TODO! Itarate over the phi to get from the specified mach number to the
     % actual mach number. 
-    phi = .5;
+    phi = .3;
     [T4,P4,M4,combustor_length,m_dot_fuel,tao] = combustor(T3_prime, P3_prime, M3_prime, phi,diffuser_exit_area);
     x_combustor = [x_diffuser(end/2),x_diffuser(end/2)+combustor_length];
     y_combustor = [A_diffuser(end/2),A_diffuser(end/2)];
     m_dot4 = (P4/(R*T4))*diffuser_exit_area*M4*sqrt(T4*gaama*R);
-    
-    if T4 > T_tungsten
+    if T4 > T_max
         disp("... ABOUT TO MELT!!! TOO MUCH HEAT ADDED")
         return
     end
@@ -71,7 +69,7 @@ for i = 1:length(mach_in)
     
     %% Nozzle
     n = 100;
-    M6_req = 3.5;
+    M6_req = 2.75;
     [x_wall,y_wall,P6,T6,M6] = MOC_nozzle(n,M6_req, P5(end), T5(end),throat_area/2);
     exit_area = y_wall(end)*2;
     x_wall = [x_wall,x_wall];
@@ -117,7 +115,7 @@ for i = 1:length(mach_in)
     legend('Inlet','Cowl','Diffuser','','Combustor','Converging Nozzle','','Diverging Nozzle','','Casing','',Location='east')
     set(gcf, 'Color', 'white');
     set(gca, 'FontSize', 18);
-    title(["Final Design for Mach in = ",num2str(mach_in(i))])
+    title(["HAWK 2.0 Final Design"])
     xlabel("X [m]")
     ylabel("Y [m]")
 end

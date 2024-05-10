@@ -29,9 +29,9 @@ combustor_time = [];
 M3_actual = [];
 
 %% Running the analysis
-for k = 1:2
+for k = 1:1
     % Importing Area Profiles of diffuser, converging and diverging nozzles!
-    if k == 1
+    if k == 2
         data = load('Area profiles_min.mat');
     else
         data = load('Area profiles_max.mat');
@@ -54,7 +54,7 @@ for k = 1:2
     for j = 1:length(mach_in) 
         disp(j)
     %% Get properties after inlet!
-        inlet_area = (A_diffuser(1)-A_diffuser(1+end/2));
+        inlet_area = .1613;
         % First step
         [M_12, t_ratio1, p_ratio1,beta1] = shock_relations(mach_in(j),gaama,theta1,0,1,0);
         
@@ -178,9 +178,9 @@ end
 figure
 set(gcf, 'Color', 'white');
 plot(mach_in,phi,LineWidth=5)
-legend('Design for M = 2.75', 'Design for M = 3.25')
+%legend('Design for M = 2.75', 'Design for M = 3.25','Location','northwest')
 set(gca, 'FontSize', 18);
-title("Equivalce ratio vs Mach number to Achieve M4 = ", num2str(M4),FontSize=18)
+title("Equivalance ratio vs Mach number to Achieve M4 = ", num2str(M4),FontSize=18)
 xlabel("Mach number",FontSize=18)
 ylabel('$\phi$', 'Interpreter', 'latex',FontSize=18)
 grid on
@@ -189,18 +189,18 @@ box off
 figure
 set(gcf, 'Color', 'white');
 plot(mach_in,m_dot_fuel,LineWidth=5)
-legend('Design for M = 2.75', 'Design for M = 3.25')
+%legend('Design for M = 2.75', 'Design for M = 3.25','Location','northwest')
 set(gca, 'FontSize', 18);
 title("Fuel flow rate required vs Mach number to Achieve M4 = ", num2str(M4),FontSize=18)
 xlabel("Mach number",FontSize=18)
-ylabel('m_dot [kg/sec]',FontSize=18)
+ylabel('m dot fuel [kg/sec]',FontSize=18)
 grid on
 box off
 
 figure
 set(gcf, 'Color', 'white');
 plot(mach_in,max_pressure,LineWidth=5)
-legend('Design for M = 2.75', 'Design for M = 3.25')
+%legend('Design for M = 2.75', 'Design for M = 3.25')
 set(gca, 'FontSize', 18);
 title("Max Pressure vs Mach number",FontSize=18)
 xlabel("Mach number",FontSize=18)
@@ -211,7 +211,7 @@ box off
 figure
 set(gcf, 'Color', 'white');
 plot(mach_in,max_temp,LineWidth=5)
-legend('Design for M = 2.75', 'Design for M = 3.25')
+%legend('Design for M = 2.75', 'Design for M = 3.25', 'Location', 'northwest')
 set(gca, 'FontSize', 18);
 title("Max Temperature vs Mach number",FontSize=18)
 xlabel("Mach number",FontSize=18)
@@ -222,7 +222,7 @@ box off
 figure
 set(gcf, 'Color', 'white');
 plot(mach_in,thrust,LineWidth=5)
-legend('Design for M = 2.75', 'Design for M = 3.25')
+%legend('Design for M = 2.75', 'Design for M = 3.25')
 set(gca, 'FontSize', 18);
 title("Thrust generated vs Mach Number",FontSize=18)
 xlabel("Mach number",FontSize=18)
@@ -233,7 +233,7 @@ box off
 figure
 set(gcf, 'Color', 'white');
 plot(mach_in,specfic_fuel_consumption,LineWidth=5)
-legend('Design for M = 2.75', 'Design for M = 3.25')
+%legend('Design for M = 2.75', 'Design for M = 3.25')
 set(gca, 'FontSize', 18);
 title("Specific fuel consumption vs Mach Number",FontSize=18)
 xlabel("Mach number",FontSize=18)
@@ -244,7 +244,7 @@ box off
 figure
 set(gcf, 'Color', 'white');
 plot(mach_in,specific_thrust,LineWidth=5)
-legend('Design for M = 2.75', 'Design for M = 3.25')
+%legend('Design for M = 2.75', 'Design for M = 3.25','Location','northwest')
 set(gca, 'FontSize', 18);
 title("Specific Thrust vs Mach Number",FontSize=18)
 xlabel("Mach number",FontSize=18)
@@ -255,7 +255,7 @@ box off
 figure
 set(gcf, 'Color', 'white');
 plot(mach_in,specfic_impulse,LineWidth=5)
-legend('Design for M = 2.75', 'Design for M = 3.25')
+%legend('Design for M = 2.75', 'Design for M = 3.25')
 set(gca, 'FontSize', 18);
 title("Specific Impulse vs Mach Number",FontSize=18)
 xlabel("Mach number",FontSize=18)
@@ -266,7 +266,7 @@ box off
 figure
 set(gcf, 'Color', 'white');
 plot(mach_in,combustor_length,LineWidth=5)
-legend('Design for M = 2.75', 'Design for M = 3.25')
+%legend('Design for M = 2.75', 'Design for M = 3.25')
 set(gca, 'FontSize', 18);
 title("Combustor length vs Mach Number to Achieve M4 = ", num2str(M4),FontSize=18)
 xlabel("Mach number",FontSize=18)
@@ -277,18 +277,18 @@ box off
 figure
 set(gcf, 'Color', 'white');
 plot(mach_in,m_dot_air,LineWidth=5)
-legend('Design for M = 2.75', 'Design for M = 3.25')
+%legend('Design for M = 2.75', 'Design for M = 3.25','Location', 'northwest')
 set(gca, 'FontSize', 18);
 title("Mass Flow Rate of Air vs Mach number",FontSize=18)
 xlabel("Mach number",FontSize=18)
-ylabel("M_dot_air [kg/sec]")
+ylabel("M dot air [kg/sec]")
 grid on
 box off
 
 figure
 set(gcf, 'Color', 'white');
 plot(mach_in,combustor_time,LineWidth=5)
-legend('Design for M = 2.75', 'Design for M = 3.25')
+%legend('Design for M = 2.75', 'Design for M = 3.25')
 set(gca, 'FontSize', 18);
 title("Time to burn fuel vs Mach number",FontSize=18)
 xlabel("Mach number",FontSize=18)
@@ -299,9 +299,9 @@ box off
 figure
 set(gcf, 'Color', 'white');
 plot(mach_in,M3_actual,LineWidth=5)
-legend('Design for M = 2.75', 'Design for M = 3.25')
+%legend('Design for M = 2.75', 'Design for M = 3.25')
 set(gca, 'FontSize', 18);
-title("Variation in diffuser's exit mach number designed to be = 0.2",FontSize=18)
+title("Variation in diffuser's exit mach number designed to be = 0.15",FontSize=18)
 xlabel("Mach number",FontSize=18)
 ylabel("M3")
 grid on

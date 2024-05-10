@@ -46,7 +46,9 @@ function [T_2, P_2, M_2,x_cowl,y_cowl,x,y,area,theta1,theta2,drag] = inlet_desig
     % TODO: NEEDS TO BE CHECKED
     area = y_cowl(2) - y(3);%sind(theta_temp)*temp_length;
     disp(['...Intake area = ',num2str(area)]);
-    drag = P_in*p_ratio1*L1*sind(theta1)+P_in*p_ratio1*p_ratio2*L2*sind(theta2);
+    L_total = sqrt((x(3)-x(2))^2 + (y(3)-y(2))^2);
+    disp(L_total)
+    drag = P_in*p_ratio1*L1*sind(theta1)+P_in*p_ratio1*p_ratio2*L_total*sind(theta2);
 end
 
 % To find the set of 2 angles that maximize the stagnation pressures. 

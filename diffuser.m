@@ -14,7 +14,6 @@ function [x,A2,M_req,P3,T3] = diffuser(M_in, T_in, P_in,A_in,T_inf,M_inf,M_req)
     T_0 = T_in*(1 + .5*(gaama-1)*M_in^2);
     P_0 = P_in*(1 + .5*(gaama-1)*M_in^2)^(gaama/(gaama-1));
    
-    T3_final = T_inf/((M_req^2)/(2/(gaama-1))+1)/(1+.5*(gaama-1)*M_inf^2);
     % Defining arrays to store future state properties. 
     A2 = [A_in];
     T3 = [];
@@ -38,7 +37,7 @@ function [x,A2,M_req,P3,T3] = diffuser(M_in, T_in, P_in,A_in,T_inf,M_inf,M_req)
             P3 = [P3,P_0/((1+.5*(gaama-1)*M2^2)^(gaama/(gaama-1)))];
         end
     end
-    x = linspace(0,2*(A2(end)-A2(1)),length(A2));
+    x = linspace(0,6*(A2(end)-A2(1)),length(A2));
     x = [x,x];
     A2 = [A2,-A2];
 end

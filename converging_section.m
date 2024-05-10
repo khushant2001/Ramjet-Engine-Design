@@ -27,7 +27,7 @@ function [M_out,T2,P2,x,A2] = converging_section(M_in, T_in, P_in,A_in)
         P2 = [P2,P_0/((1+.5*(gaama-1)*M2^2)^(gaama/(gaama-1)))];
     end
     M_out = 1.0;
-    x = linspace(0,2*(A2(1)-A2(end)),length(A2));
+    x = linspace(0,4*(A2(1)-A2(end)),length(A2));
     x = [x,x];
     A2 = [A2,-A2];
 end
