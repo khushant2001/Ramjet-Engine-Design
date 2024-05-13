@@ -1,5 +1,4 @@
 # Ramjet-Engine-Design
 Designing a ramjet engine using first principles of compressible flow. Components simulated include: inlet, diffuser, flameholder, combustor, converging and diverging nozzle. Download the "instructions_to_run_code" file on seeing how to run the code. 
-![image](https://github.com/khushant2001/Ramjet-Engine-Design/assets/70731991/8329c460-cfb6-486a-bce0-3832235160d4)
 
-![image](https://github.com/khushant2001/Ramjet-Engine-Design/assets/70731991/376a0826-cfef-404d-b3bf-a388e991f215)
+![ramjet](https://github.com/khushant2001/Ramjet-Engine-Design/assets/70731991/d1c74974-6710-45c7-a7ef-20e91414c2d4)
